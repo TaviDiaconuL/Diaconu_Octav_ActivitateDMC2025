@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -62,8 +63,9 @@ public class SecondActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == REQUEST_CODE && resultCode == RESULT_OK) {
-            setResult(RESULT_OK, data);
-            finish();
+            String message = data.getStringExtra("RETURN_MESSAGE");
+            int sum = data.getIntExtra("SUM", 0);
+            Toast.makeText(this, message + " - Suma: " + sum, Toast.LENGTH_LONG).show();
         }
     }
 }
