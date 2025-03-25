@@ -17,7 +17,7 @@ import java.util.ArrayList;
 public class MainActivity extends AppCompatActivity {
     private ActivityMainBinding binding;
     private ArrayList<Conducator> listaConducatori = new ArrayList<>();
-    private ArrayAdapter<Conducator> adapter;
+    private ConducatorAdapter adapter; // Updated to use custom adapter
 
     private final ActivityResultLauncher<Intent> addConducatorLauncher =
             registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
@@ -26,8 +26,15 @@ public class MainActivity extends AppCompatActivity {
                         public void onActivityResult(ActivityResult result) {
                             if (result.getResultCode() == RESULT_OK && result.getData() != null) {
                                 Conducator conducator = result.getData().getParcelableExtra("conducator");
+                                int position = result.getData().getIntExtra("position", -1);
                                 if (conducator != null) {
-                                    listaConducatori.add(conducator);
+                                    if (position == -1) {
+                                        // Add new item
+                                        listaConducatori.add(conducator);
+                                    } else {
+                                        // Update existing item
+                                        listaConducatori.set(position, conducator);
+                                    }
                                     adapter.notifyDataSetChanged();
                                 }
                             }
@@ -41,15 +48,18 @@ public class MainActivity extends AppCompatActivity {
         setContentView(binding.getRoot());
 
         // Configurare ListView
-        adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, listaConducatori);
+        adapter = new ConducatorAdapter(this, listaConducatori);
         binding.listViewConducatori.setAdapter(adapter);
 
-        // Click simplu pe item
+        // Click simplu pe item pentru editare
         binding.listViewConducatori.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Conducator conducator = listaConducatori.get(position);
-                Toast.makeText(MainActivity.this, conducator.toString(), Toast.LENGTH_SHORT).show();
+                Intent intent = new Intent(MainActivity.this, AddConducatorActivity.class);
+                intent.putExtra("conducator", conducator);
+                intent.putExtra("position", position); // Pass the position to identify the object
+                addConducatorLauncher.launch(intent);
             }
         });
 
@@ -69,7 +79,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(MainActivity.this, AddConducatorActivity.class);
-                addConducatorLauncher.launch(intent);
+                addConducatorLauncher.launch(intent); // No position means adding a new item
             }
         });
     }

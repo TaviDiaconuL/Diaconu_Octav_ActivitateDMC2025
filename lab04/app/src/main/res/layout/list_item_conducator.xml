@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="12dp"
+    android:background="#F00000">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="8dp"
+        android:background="#756B36"
+        android:layout_marginBottom="4dp">
+
+        <TextView
+            android:id="@+id/tvNume"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Nume Conducător"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:textColor="#1953E6" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="8dp"
+        android:background="#E8F5E9"
+        android:layout_marginBottom="4dp">
+
+        <TextView
+            android:id="@+id/tvPermis"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Permis: Da"
+            android:textSize="14sp"
+            android:textColor="#2E7D32" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="8dp"
+        android:background="#E3F2FD"
+        android:layout_marginBottom="4dp">
+
+        <TextView
+            android:id="@+id/tvExperienta"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Experiență: 5 ani"
+            android:textSize="14sp"
+            android:textColor="#1976D2" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="8dp"
+        android:background="#F3E5F5"
+        android:layout_marginBottom="4dp">
+
+        <TextView
+            android:id="@+id/tvTipPermis"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Tip: B"
+            android:textSize="14sp"
+            android:textColor="#7B1FA2" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="8dp"
+        android:background="#FFFDE7"
+        android:layout_marginBottom="4dp">
+
+        <TextView
+            android:id="@+id/tvVarsta"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Vârsta: 30"
+            android:textSize="14sp"
+            android:textColor="#FBC02D" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="8dp"
+        android:background="#ECEFF1"
+        android:layout_marginBottom="4dp">
+
+        <TextView
+            android:id="@+id/tvData"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Data: 25/03/2020"
+            android:textSize="14sp"
+            android:textColor="#455A64" />
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#E0E0E0" />
+</LinearLayout>

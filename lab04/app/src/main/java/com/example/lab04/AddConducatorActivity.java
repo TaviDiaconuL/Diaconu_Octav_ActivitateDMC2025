@@ -27,11 +27,31 @@ public class AddConducatorActivity extends AppCompatActivity {
                 android.R.layout.simple_spinner_item, Conducator.LicenseType.values());
         binding.spinnerTipPermis.setAdapter(adapter);
 
+        // Check if we're editing an existing Conducator
+        Intent intent = getIntent();
+        Conducator conducator = intent.getParcelableExtra("conducator");
+        int position = intent.getIntExtra("position", -1);
+
+        if (conducator != null) {
+            // Populate fields with existing data
+            binding.etNume.setText(conducator.getNume());
+            binding.cbPermis.setChecked(conducator.isArePermis());
+            binding.etExperienta.setText(String.valueOf(conducator.getAniExperienta()));
+            binding.spinnerTipPermis.setSelection(adapter.getPosition(conducator.getTipPermis()));
+            binding.ratingVarsta.setRating(conducator.getVarsta());
+            dataObtinerePermis = conducator.getDataObtinerePermis();
+            SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
+            binding.etDataObtinerePermis.setText(sdf.format(dataObtinerePermis));
+        }
+
         // Configurare DatePicker pentru data permisului
         binding.etDataObtinerePermis.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 final Calendar calendar = Calendar.getInstance();
+                if (dataObtinerePermis != null) {
+                    calendar.setTime(dataObtinerePermis);
+                }
                 int year = calendar.get(Calendar.YEAR);
                 int month = calendar.get(Calendar.MONTH);
                 int day = calendar.get(Calendar.DAY_OF_MONTH);
@@ -64,16 +84,18 @@ public class AddConducatorActivity extends AppCompatActivity {
                         binding.spinnerTipPermis.getSelectedItem();
                 float varsta = binding.ratingVarsta.getRating();
 
-                // Folosim data selectată din DatePicker, fallback la data curentă dacă nu e setată
                 if (dataObtinerePermis == null) {
                     dataObtinerePermis = new Date();
                 }
 
-                Conducator conducator = new Conducator(nume, arePermis, aniExperienta,
+                Conducator newConducator = new Conducator(nume, arePermis, aniExperienta,
                         tipPermis, varsta, dataObtinerePermis);
 
                 Intent resultIntent = new Intent();
-                resultIntent.putExtra("conducator", conducator);
+                resultIntent.putExtra("conducator", newConducator);
+                if (position != -1) {
+                    resultIntent.putExtra("position", position); // Pass position back for editing
+                }
                 setResult(RESULT_OK, resultIntent);
                 finish();
             }
