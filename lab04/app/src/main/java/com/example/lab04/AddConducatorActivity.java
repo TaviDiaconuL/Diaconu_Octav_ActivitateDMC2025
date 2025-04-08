@@ -7,6 +7,8 @@ import android.view.View;
 import android.widget.ArrayAdapter;
 import androidx.appcompat.app.AppCompatActivity;
 import com.example.lab04.databinding.ActivityAddConducatorBinding;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -22,36 +24,19 @@ public class AddConducatorActivity extends AppCompatActivity {
         binding = ActivityAddConducatorBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
+        // Aplicare setări text
+        TextSettingsUtil.applyTextSettings(this, binding.getRoot());
+
         // Configurare spinner
         ArrayAdapter<Conducator.LicenseType> adapter = new ArrayAdapter<>(this,
                 android.R.layout.simple_spinner_item, Conducator.LicenseType.values());
         binding.spinnerTipPermis.setAdapter(adapter);
 
-        // Check if we're editing an existing Conducator
-        Intent intent = getIntent();
-        Conducator conducator = intent.getParcelableExtra("conducator");
-        int position = intent.getIntExtra("position", -1);
-
-        if (conducator != null) {
-            // Populate fields with existing data
-            binding.etNume.setText(conducator.getNume());
-            binding.cbPermis.setChecked(conducator.isArePermis());
-            binding.etExperienta.setText(String.valueOf(conducator.getAniExperienta()));
-            binding.spinnerTipPermis.setSelection(adapter.getPosition(conducator.getTipPermis()));
-            binding.ratingVarsta.setRating(conducator.getVarsta());
-            dataObtinerePermis = conducator.getDataObtinerePermis();
-            SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
-            binding.etDataObtinerePermis.setText(sdf.format(dataObtinerePermis));
-        }
-
-        // Configurare DatePicker pentru data permisului
+        // Configurare DatePicker
         binding.etDataObtinerePermis.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 final Calendar calendar = Calendar.getInstance();
-                if (dataObtinerePermis != null) {
-                    calendar.setTime(dataObtinerePermis);
-                }
                 int year = calendar.get(Calendar.YEAR);
                 int month = calendar.get(Calendar.MONTH);
                 int day = calendar.get(Calendar.DAY_OF_MONTH);
@@ -88,17 +73,26 @@ public class AddConducatorActivity extends AppCompatActivity {
                     dataObtinerePermis = new Date();
                 }
 
-                Conducator newConducator = new Conducator(nume, arePermis, aniExperienta,
+                Conducator conducator = new Conducator(nume, arePermis, aniExperienta,
                         tipPermis, varsta, dataObtinerePermis);
 
+                saveToFile(conducator);
+
                 Intent resultIntent = new Intent();
-                resultIntent.putExtra("conducator", newConducator);
-                if (position != -1) {
-                    resultIntent.putExtra("position", position); // Pass position back for editing
-                }
+                resultIntent.putExtra("conducator", conducator);
                 setResult(RESULT_OK, resultIntent);
                 finish();
             }
         });
+    }
+
+    private void saveToFile(Conducator conducator) {
+        String fileName = "conducatori.txt";
+        String data = conducator.toString() + "\n";
+        try (FileOutputStream fos = openFileOutput(fileName, MODE_APPEND)) {
+            fos.write(data.getBytes());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }
