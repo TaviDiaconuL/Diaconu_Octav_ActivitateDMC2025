@@ -1,15 +1,15 @@
+// MainActivity.java
 package com.example.lab04;
 
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.activity.result.ActivityResult;
@@ -18,15 +18,14 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 import com.example.lab04.databinding.ActivityMainBinding;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.util.ArrayList;
-
+import androidx.recyclerview.widget.LinearLayoutManager;
 public class MainActivity extends AppCompatActivity {
     private ActivityMainBinding binding;
     private ArrayList<Conducator> listaConducatori = new ArrayList<>();
-    private ArrayAdapter<Conducator> adapter;
-
+    private ConducatorRecyclerAdapter adapter; // Change to RecyclerView adapter
+    private DatabaseHelper dbHelper;
+    private EditText etSearchName, etMinExp, etMaxExp, etDeleteExp, etUpdateLetter;
     private final ActivityResultLauncher<Intent> addConducatorLauncher =
             registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
                     new ActivityResultCallback<ActivityResult>() {
@@ -35,8 +34,8 @@ public class MainActivity extends AppCompatActivity {
                             if (result.getResultCode() == RESULT_OK && result.getData() != null) {
                                 Conducator conducator = result.getData().getParcelableExtra("conducator");
                                 if (conducator != null) {
-                                    listaConducatori.add(conducator);
-                                    adapter.notifyDataSetChanged();
+                                   // dbHelper.insertConducator(conducator);
+                                    refreshList();
                                 }
                             }
                         }
@@ -47,13 +46,9 @@ public class MainActivity extends AppCompatActivity {
                     new ActivityResultCallback<ActivityResult>() {
                         @Override
                         public void onActivityResult(ActivityResult result) {
-                            Log.d("MainActivity", "Rezultat primit: " + result.getResultCode());
                             if (result.getResultCode() == RESULT_OK) {
-                                Log.d("MainActivity", "RESULT_OK detectat, aplicăm setările");
                                 TextSettingsUtil.applyTextSettings(MainActivity.this, binding.getRoot());
                                 adapter.notifyDataSetChanged();
-                            } else {
-                                Log.d("MainActivity", "Nu e RESULT_OK, cod: " + result.getResultCode());
                             }
                         }
                     });
@@ -64,90 +59,103 @@ public class MainActivity extends AppCompatActivity {
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-        // Aplicare setări inițiale
+        dbHelper = new DatabaseHelper(this);
+
+        // Initialize adapter for RecyclerView
+        adapter = new ConducatorRecyclerAdapter(listaConducatori);
+        binding.recyclerViewConducatori.setAdapter(adapter);
+        binding.recyclerViewConducatori.setLayoutManager(new LinearLayoutManager(this));
+
+        // Initialize additional UI elements
+        etSearchName = findViewById(R.id.etSearchName);
+        etMinExp = findViewById(R.id.etMinExp);
+        etMaxExp = findViewById(R.id.etMaxExp);
+        etDeleteExp = findViewById(R.id.etDeleteExp);
+        etUpdateLetter = findViewById(R.id.etUpdateLetter);
+
+        // Apply initial text settings
         TextSettingsUtil.applyTextSettings(this, binding.getRoot());
 
-        // Configurare ListView cu adapter personalizat
-        adapter = new ArrayAdapter<Conducator>(this, android.R.layout.simple_list_item_1, listaConducatori) {
-            @Override
-            public View getView(int position, View convertView, ViewGroup parent) {
-                View view = super.getView(position, convertView, parent);
-                TextView textView = view.findViewById(android.R.id.text1);
-                SharedPreferences prefs = getSharedPreferences("SettingsPrefs", MODE_PRIVATE);
-                float textSize = prefs.getFloat("textSize", 16f);
-                int colorIndex = prefs.getInt("textColorIndex", 0);
-                int textColor = getColorFromIndex(colorIndex);
+        // Button listeners
+        binding.btnAddConducator.setOnClickListener(v -> {
+            Intent intent = new Intent(MainActivity.this, AddConducatorActivity.class);
+            addConducatorLauncher.launch(intent);
+        });
 
-                textView.setTextSize(textSize);
-                textView.setTextColor(textColor);
-                return view;
-            }
+        binding.btnSettings.setOnClickListener(v -> {
+            Intent intent = new Intent(MainActivity.this, SettingsActivity.class);
+            settingsLauncher.launch(intent);
+        });
 
-            private int getColorFromIndex(int index) {
-                switch (index) {
-                    case 1: return Color.RED;
-                    case 2: return Color.BLUE;
-                    case 3: return Color.GREEN;
-                    default: return Color.BLACK;
+        findViewById(R.id.btnShowAll).setOnClickListener(v -> refreshList());
+
+        findViewById(R.id.btnSearchName).setOnClickListener(v -> {
+            String name = etSearchName.getText().toString();
+            if (!name.isEmpty()) {
+                Conducator conducator = dbHelper.getConducatorByName(name);
+                listaConducatori.clear();
+                if (conducator != null) {
+                    listaConducatori.add(conducator);
+                    Toast.makeText(this, "Conducător găsit", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(this, "Niciun conducător găsit", Toast.LENGTH_SHORT).show();
                 }
-            }
-        };
-        binding.listViewConducatori.setAdapter(adapter);
-
-        // Click simplu pe item
-        binding.listViewConducatori.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Conducator conducator = listaConducatori.get(position);
-                Toast.makeText(MainActivity.this, conducator.toString(), Toast.LENGTH_SHORT).show();
+                adapter.notifyDataSetChanged();
             }
         });
 
-        // Click lung pe item (salvare în favoriți)
-        binding.listViewConducatori.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
-            @Override
-            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-                Conducator conducator = listaConducatori.get(position);
-                saveToFavorites(conducator);
-                Toast.makeText(MainActivity.this, "Adăugat la favoriți", Toast.LENGTH_SHORT).show();
-                return true;
+        findViewById(R.id.btnSearchExpRange).setOnClickListener(v -> {
+            try {
+                int minExp = Integer.parseInt(etMinExp.getText().toString());
+                int maxExp = Integer.parseInt(etMaxExp.getText().toString());
+                listaConducatori.clear();
+                listaConducatori.addAll(dbHelper.getConducatoriByExperienceRange(minExp, maxExp));
+                adapter.notifyDataSetChanged();
+                Toast.makeText(this, "Afișare conducători cu experiență între " + minExp + " și " + maxExp + " ani", Toast.LENGTH_SHORT).show();
+            } catch (NumberFormatException e) {
+                Toast.makeText(this, "Introduceți valori numerice valide", Toast.LENGTH_SHORT).show();
             }
         });
 
-        // Buton adăugare
-        binding.btnAddConducator.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(MainActivity.this, AddConducatorActivity.class);
-                addConducatorLauncher.launch(intent);
+        findViewById(R.id.btnDeleteExp).setOnClickListener(v -> {
+            try {
+                int threshold = Integer.parseInt(etDeleteExp.getText().toString());
+                int rowsDeleted = dbHelper.deleteConducatoriByExperience(threshold, true);
+                refreshList();
+                Toast.makeText(this, rowsDeleted + " conducători șterși", Toast.LENGTH_SHORT).show();
+            } catch (NumberFormatException e) {
+                Toast.makeText(this, "Introduceți o valoare numerică validă", Toast.LENGTH_SHORT).show();
             }
         });
 
-        // Buton setări
-        binding.btnSettings.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(MainActivity.this, SettingsActivity.class);
-                settingsLauncher.launch(intent);
+        findViewById(R.id.btnUpdateExp).setOnClickListener(v -> {
+            String letter = etUpdateLetter.getText().toString();
+            if (!letter.isEmpty()) {
+                int rowsUpdated = dbHelper.incrementExperienceByNameStart(letter.charAt(0));
+                refreshList();
+                Toast.makeText(this, rowsUpdated + " conducători actualizați", Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(this, "Introduceți o literă", Toast.LENGTH_SHORT).show();
             }
         });
+
+        // Initial list load
+        refreshList();
+    }
+
+    private void refreshList() {
+        Log.d("MainActivity", "Refreshing list...");
+        listaConducatori.clear();
+        Log.d("MainActivity", "List cleared. Size: " + listaConducatori.size());
+        listaConducatori.addAll(dbHelper.getAllConducatori());
+        Log.d("MainActivity", "List populated. Size: " + listaConducatori.size());
+        adapter.notifyDataSetChanged();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        Log.d("MainActivity", "onResume apelat, reaplicăm setările");
         TextSettingsUtil.applyTextSettings(this, binding.getRoot());
         adapter.notifyDataSetChanged();
-    }
-
-    private void saveToFavorites(Conducator conducator) {
-        String fileName = "favorite.txt";
-        String data = conducator.toString() + "\n";
-        try (FileOutputStream fos = openFileOutput(fileName, MODE_APPEND)) {
-            fos.write(data.getBytes());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 }

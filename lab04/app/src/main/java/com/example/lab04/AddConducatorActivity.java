@@ -76,8 +76,8 @@ public class AddConducatorActivity extends AppCompatActivity {
                 Conducator conducator = new Conducator(nume, arePermis, aniExperienta,
                         tipPermis, varsta, dataObtinerePermis);
 
-                saveToFile(conducator);
-
+                //saveToFile(conducator);
+                saveToDatabase(conducator);
                 Intent resultIntent = new Intent();
                 resultIntent.putExtra("conducator", conducator);
                 setResult(RESULT_OK, resultIntent);
@@ -86,7 +86,7 @@ public class AddConducatorActivity extends AppCompatActivity {
         });
     }
 
-    private void saveToFile(Conducator conducator) {
+   /* private void saveToFile(Conducator conducator) {
         String fileName = "conducatori.txt";
         String data = conducator.toString() + "\n";
         try (FileOutputStream fos = openFileOutput(fileName, MODE_APPEND)) {
@@ -95,4 +95,9 @@ public class AddConducatorActivity extends AppCompatActivity {
             e.printStackTrace();
         }
     }
+    */
+   private void saveToDatabase(Conducator conducator) {
+       DatabaseHelper dbHelper = new DatabaseHelper(this);
+       dbHelper.insertConducator(conducator);
+   }
 }

@@ -1,37 +1,144 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="16dp">
+    android:fillViewport="true">
 
-    <Button
-        android:id="@+id/btnAddConducator"
-        android:layout_width="0dp"
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Adaugă Conducător"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="80dp" />
+        android:padding="16dp"
+        android:fitsSystemWindows="true">
 
-    <Button
-        android:id="@+id/btnSettings"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:text="Setări"
-        app:layout_constraintTop_toBottomOf="@id/btnAddConducator"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="16dp" />
+        <!-- "Adaugă Conducător" button with adjusted margin -->
+        <Button
+            android:id="@+id/btnAddConducator"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="Adaugă Conducător"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginTop="16dp" />
 
-    <ListView
-        android:id="@+id/listViewConducatori"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        app:layout_constraintTop_toBottomOf="@id/btnSettings"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="16dp" />
-</androidx.constraintlayout.widget.ConstraintLayout>
+        <Button
+            android:id="@+id/btnSettings"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="Setări"
+            app:layout_constraintTop_toBottomOf="@id/btnAddConducator"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginTop="8dp" />
+
+        <Button
+            android:id="@+id/btnShowAll"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="Afișează Toți"
+            app:layout_constraintTop_toBottomOf="@id/btnSettings"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginTop="8dp" />
+
+        <EditText
+            android:id="@+id/etSearchName"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:hint="Caută după nume"
+            app:layout_constraintTop_toBottomOf="@id/btnShowAll"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/btnSearchName"
+            android:layout_marginTop="8dp" />
+
+        <Button
+            android:id="@+id/btnSearchName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Caută"
+            app:layout_constraintTop_toBottomOf="@id/btnShowAll"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginTop="8dp" />
+
+        <EditText
+            android:id="@+id/etMinExp"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:hint="Exp. minimă"
+            android:inputType="number"
+            app:layout_constraintTop_toBottomOf="@id/etSearchName"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/etMaxExp"
+            android:layout_marginTop="8dp" />
+
+        <EditText
+            android:id="@+id/etMaxExp"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:hint="Exp. maximă"
+            android:inputType="number"
+            app:layout_constraintTop_toBottomOf="@id/etSearchName"
+            app:layout_constraintStart_toEndOf="@id/etMinExp"
+            app:layout_constraintEnd_toStartOf="@id/btnSearchExpRange"
+            android:layout_marginTop="8dp" />
+
+        <Button
+            android:id="@+id/btnSearchExpRange"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Caută"
+            app:layout_constraintTop_toBottomOf="@id/etSearchName"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginTop="8dp" />
+
+        <EditText
+            android:id="@+id/etDeleteExp"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:hint="Șterge peste exp."
+            android:inputType="number"
+            app:layout_constraintTop_toBottomOf="@id/etMinExp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/btnDeleteExp"
+            android:layout_marginTop="8dp" />
+
+        <Button
+            android:id="@+id/btnDeleteExp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Șterge"
+            app:layout_constraintTop_toBottomOf="@id/etMinExp"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginTop="8dp" />
+
+        <EditText
+            android:id="@+id/etUpdateLetter"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:hint="Literă pentru update"
+            app:layout_constraintTop_toBottomOf="@id/etDeleteExp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/btnUpdateExp"
+            android:layout_marginTop="8dp" />
+
+        <Button
+            android:id="@+id/btnUpdateExp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Update"
+            app:layout_constraintTop_toBottomOf="@id/etDeleteExp"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginTop="8dp" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recyclerViewConducatori"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toBottomOf="@id/etUpdateLetter"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginTop="16dp" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</ScrollView>
