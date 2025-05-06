@@ -1,31 +1,29 @@
-// MainActivity.java
 package com.example.lab04;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.graphics.Color;
 import android.os.Bundle;
-import android.util.Log;
-import android.view.View;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.EditText;
-import android.widget.TextView;
 import android.widget.Toast;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.activity.result.ActivityResult;
 import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
-import androidx.appcompat.app.AppCompatActivity;
-import com.example.lab04.databinding.ActivityMainBinding;
-import java.util.ArrayList;
 import androidx.recyclerview.widget.LinearLayoutManager;
+import com.example.lab04.databinding.ActivityMainBinding;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+import java.util.ArrayList;
+
 public class MainActivity extends AppCompatActivity {
     private ActivityMainBinding binding;
     private ArrayList<Conducator> listaConducatori = new ArrayList<>();
-    private ConducatorRecyclerAdapter adapter; // Change to RecyclerView adapter
+    private ConducatorRecyclerAdapter adapter;
     private DatabaseHelper dbHelper;
-    private EditText etSearchName, etMinExp, etMaxExp, etDeleteExp, etUpdateLetter;
+    private DatabaseReference firebaseRef;
+
     private final ActivityResultLauncher<Intent> addConducatorLauncher =
             registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
                     new ActivityResultCallback<ActivityResult>() {
@@ -34,7 +32,6 @@ public class MainActivity extends AppCompatActivity {
                             if (result.getResultCode() == RESULT_OK && result.getData() != null) {
                                 Conducator conducator = result.getData().getParcelableExtra("conducator");
                                 if (conducator != null) {
-                                   // dbHelper.insertConducator(conducator);
                                     refreshList();
                                 }
                             }
@@ -60,18 +57,12 @@ public class MainActivity extends AppCompatActivity {
         setContentView(binding.getRoot());
 
         dbHelper = new DatabaseHelper(this);
+        firebaseRef = FirebaseDatabase.getInstance().getReference("conducatori");
 
         // Initialize adapter for RecyclerView
         adapter = new ConducatorRecyclerAdapter(listaConducatori);
         binding.recyclerViewConducatori.setAdapter(adapter);
         binding.recyclerViewConducatori.setLayoutManager(new LinearLayoutManager(this));
-
-        // Initialize additional UI elements
-        etSearchName = findViewById(R.id.etSearchName);
-        etMinExp = findViewById(R.id.etMinExp);
-        etMaxExp = findViewById(R.id.etMaxExp);
-        etDeleteExp = findViewById(R.id.etDeleteExp);
-        etUpdateLetter = findViewById(R.id.etUpdateLetter);
 
         // Apply initial text settings
         TextSettingsUtil.applyTextSettings(this, binding.getRoot());
@@ -87,10 +78,10 @@ public class MainActivity extends AppCompatActivity {
             settingsLauncher.launch(intent);
         });
 
-        findViewById(R.id.btnShowAll).setOnClickListener(v -> refreshList());
+        binding.btnShowAll.setOnClickListener(v -> refreshList());
 
-        findViewById(R.id.btnSearchName).setOnClickListener(v -> {
-            String name = etSearchName.getText().toString();
+        binding.btnSearchName.setOnClickListener(v -> {
+            String name = binding.etSearchName.getText().toString();
             if (!name.isEmpty()) {
                 Conducator conducator = dbHelper.getConducatorByName(name);
                 listaConducatori.clear();
@@ -104,10 +95,10 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        findViewById(R.id.btnSearchExpRange).setOnClickListener(v -> {
+        binding.btnSearchExpRange.setOnClickListener(v -> {
             try {
-                int minExp = Integer.parseInt(etMinExp.getText().toString());
-                int maxExp = Integer.parseInt(etMaxExp.getText().toString());
+                int minExp = Integer.parseInt(binding.etMinExp.getText().toString());
+                int maxExp = Integer.parseInt(binding.etMaxExp.getText().toString());
                 listaConducatori.clear();
                 listaConducatori.addAll(dbHelper.getConducatoriByExperienceRange(minExp, maxExp));
                 adapter.notifyDataSetChanged();
@@ -117,9 +108,9 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        findViewById(R.id.btnDeleteExp).setOnClickListener(v -> {
+        binding.btnDeleteExp.setOnClickListener(v -> {
             try {
-                int threshold = Integer.parseInt(etDeleteExp.getText().toString());
+                int threshold = Integer.parseInt(binding.etDeleteExp.getText().toString());
                 int rowsDeleted = dbHelper.deleteConducatoriByExperience(threshold, true);
                 refreshList();
                 Toast.makeText(this, rowsDeleted + " conducători șterși", Toast.LENGTH_SHORT).show();
@@ -128,8 +119,8 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        findViewById(R.id.btnUpdateExp).setOnClickListener(v -> {
-            String letter = etUpdateLetter.getText().toString();
+        binding.btnUpdateExp.setOnClickListener(v -> {
+            String letter = binding.etUpdateLetter.getText().toString();
             if (!letter.isEmpty()) {
                 int rowsUpdated = dbHelper.incrementExperienceByNameStart(letter.charAt(0));
                 refreshList();
@@ -139,17 +130,36 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        binding.btnViewFavorites.setOnClickListener(v -> {
+            Intent intent = new Intent(MainActivity.this, FavoritesActivity.class);
+            startActivity(intent);
+        });
+
+        // Listen for Firebase changes
+        setupFirebaseListener();
+
         // Initial list load
         refreshList();
     }
 
     private void refreshList() {
-        Log.d("MainActivity", "Refreshing list...");
         listaConducatori.clear();
-        Log.d("MainActivity", "List cleared. Size: " + listaConducatori.size());
         listaConducatori.addAll(dbHelper.getAllConducatori());
-        Log.d("MainActivity", "List populated. Size: " + listaConducatori.size());
         adapter.notifyDataSetChanged();
+    }
+
+    private void setupFirebaseListener() {
+        firebaseRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot snapshot) {
+                Toast.makeText(MainActivity.this, "Modificări în baza de date Firebase", Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onCancelled(DatabaseError error) {
+                Toast.makeText(MainActivity.this, "Eroare Firebase: " + error.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     @Override

@@ -1,6 +1,5 @@
-plugins {
-    alias(libs.plugins.android.application)
-}
+plugins { alias(libs.plugins.android.application)
+    id("com.google.gms.google-services") version "4.4.2" apply true }
 
 android {
     namespace = "com.example.lab04"
@@ -33,12 +32,12 @@ android {
     }
 }
 
-dependencies {
-    implementation(libs.appcompat)
+dependencies { implementation(libs.appcompat)
     implementation(libs.material)
     implementation(libs.activity)
     implementation(libs.constraintlayout)
+    implementation(libs.firebase.database)
+    implementation(libs.firebase.core)
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
-    androidTestImplementation(libs.espresso.core)
-}
+    androidTestImplementation(libs.espresso.core) }

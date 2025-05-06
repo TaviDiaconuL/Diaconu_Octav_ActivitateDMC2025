@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "690935456747",
+    "firebase_url": "https://dispmobile-c7b22-default-rtdb.europe-west1.firebasedatabase.app",
+    "project_id": "dispmobile-c7b22",
+    "storage_bucket": "dispmobile-c7b22.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:690935456747:android:9502e506ce2df73dc22fae",
+        "android_client_info": {
+          "package_name": "com.example.lab04"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBV_UOp7VXD5qp_5m-kcAUEN6VU_h0D15w"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
